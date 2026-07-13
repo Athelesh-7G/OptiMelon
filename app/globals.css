@@ -3,107 +3,125 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ============================================================
-   OptiMelon Design System — dark, production-grade
-   Signature accent: watermelon pink (#ff4d6d)
-   New raw-token system + bridged Tailwind semantic tokens
-   ============================================================ */
+/* OptiMelon - Watermelon Theme
+   Colors:
+   - Primary: Natural Watermelon Flesh Red (#E53935)
+   - Accent: Fresh green (#0D9488)
+   - Neutrals: Clean whites to charcoal
+*/
 
 :root {
-  /* Backgrounds — layered from darkest to lightest surface */
-  --bg-base: #080808;       /* page background */
-  --bg-surface: #111111;    /* cards, panels */
-  --bg-elevated: #1a1a1a;   /* hover states, selected items */
-  --bg-input: #141414;      /* input fields */
-
-  /* Borders */
-  --border-color: #222222;
-  --border-subtle: #1a1a1a;
-  --border-focus: #333333;
-
-  /* Text */
-  --text-primary: #f0f0f0;
-  --text-secondary: #888888;
-  --text-muted: #555555;
-  --text-inverse: #080808;
-
-  /* Accent — watermelon pink */
-  --accent: #ff4d6d;
-  --accent-hover: #e64460;
-  --accent-subtle: rgba(255, 77, 109, 0.1);
-
-  /* Semantic */
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
-
-  /* Watermelon design language */
-  --melon-green: #1d4a2a;        /* dark watermelon rind */
-  --melon-green-light: #2d6b3f;  /* lighter rind accent */
-  --melon-pink: #ff4d6d;         /* watermelon flesh */
-  --melon-seed: #1a1a1a;         /* seed color */
-
-  /* Legacy melon aliases (kept for any remaining consumers) */
-  --melon-red: #ff4d6d;
-  --melon-red-soft: #ff6b85;
-  --melon-red-muted: rgba(255, 77, 109, 0.12);
-  --melon-red-border: rgba(255, 77, 109, 0.35);
-
-  /* ---- Bridged Tailwind semantic tokens (map old utilities to new palette) ---- */
-  --background: var(--bg-base);
-  --foreground: var(--text-primary);
-  --card: var(--bg-surface);
-  --card-foreground: var(--text-primary);
-  --popover: var(--bg-elevated);
-  --popover-foreground: var(--text-primary);
-  --primary: var(--accent);
-  --primary-foreground: #ffffff;
-  --secondary: var(--bg-elevated);
-  --secondary-foreground: var(--text-primary);
-  --muted: var(--bg-input);
-  --muted-foreground: var(--text-secondary);
-  --destructive: var(--error);
-  --destructive-foreground: #ffffff;
-  --border: var(--border-color);
-  --input: var(--bg-input);
-  --ring: rgba(255, 77, 109, 0.5);
-  --chart-1: #ff4d6d;
-  --chart-2: #2d6b3f;
-  --chart-3: #ff6b85;
-  --chart-4: #22c55e;
-  --chart-5: #888888;
-
-  /* Sidebar tokens */
-  --sidebar: var(--bg-surface);
-  --sidebar-foreground: var(--text-primary);
-  --sidebar-primary: var(--accent);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: var(--bg-elevated);
-  --sidebar-accent-foreground: var(--text-primary);
-  --sidebar-border: var(--border-subtle);
-  --sidebar-ring: rgba(255, 77, 109, 0.5);
-
-  /* Glass surfaces (kept for legacy components) */
-  --glass-bg: rgba(17, 17, 17, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-glow: rgba(255, 77, 109, 0.12);
-
-  --dropdown-bg: var(--bg-surface);
-  --dropdown-item-hover: rgba(255, 255, 255, 0.04);
+  /* Light Mode - Clean white base with watermelon red accents */
+  --background: #FAFAF9;
+  --foreground: #1A1A1F;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A1F;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1A1F;
+  --primary: #E53935;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F0EFED;
+  --secondary-foreground: #1A1A1F;
+  --muted: #E8E7E5;
+  --muted-foreground: #52525A;
+  --accent: #0D9488;
+  --accent-foreground: #FFFFFF;
+  --destructive: #B71C1C;
+  --destructive-foreground: #FFFFFF;
+  --border: #D4D4D2;
+  --input: #FFFFFF;
+  --ring: rgba(229, 57, 53, 0.5);
+  --chart-1: #E53935;
+  --chart-2: #0D9488;
+  --chart-3: #EF5350;
+  --chart-4: #14B8A6;
+  --chart-5: #FFCDD2;
+  --radius: 0.75rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1A1A1F;
+  --sidebar-primary: #E53935;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F0EFED;
+  --sidebar-accent-foreground: #1A1A1F;
+  --sidebar-border: #D4D4D2;
+  --sidebar-ring: rgba(229, 57, 53, 0.5);
+  
+  /* Canonical Watermelon Red Token System */
+  --melon-red: #E53935;
+  --melon-red-soft: #EF5350;
+  --melon-red-muted: rgba(229, 57, 53, 0.15);
+  --melon-red-border: rgba(229, 57, 53, 0.35);
+  --melon-green: #0D9488;
+  
+  /* Light Mode Glass Surfaces */
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(0, 0, 0, 0.12);
+  --glass-glow: rgba(229, 57, 53, 0.1);
+  
+  /* Light Mode Interactive Colors */
+  --interactive-muted: rgba(0, 0, 0, 0.5);
+  --interactive-hover: rgba(0, 0, 0, 0.7);
+  --dropdown-bg: rgba(255, 255, 255, 0.98);
+  --dropdown-item-hover: rgba(0, 0, 0, 0.05);
 }
 
-/* Dark class kept identical so next-themes `dark:` variants stay consistent.
-   The app is dark-only; :root already carries the dark palette. */
 .dark {
-  color-scheme: dark;
+  /* Dark Mode - Natural Watermelon Flesh Red */
+  --background: #0A0A0B;
+  --foreground: rgba(255, 255, 255, 0.95);
+  --card: rgba(26, 26, 31, 0.6);
+  --card-foreground: rgba(255, 255, 255, 0.95);
+  --popover: rgba(26, 26, 31, 0.9);
+  --popover-foreground: rgba(255, 255, 255, 0.95);
+  --primary: #E53935;
+  --primary-foreground: #FFFFFF;
+  --secondary: #131316;
+  --secondary-foreground: rgba(255, 255, 255, 0.95);
+  --muted: #1A1A1F;
+  --muted-foreground: rgba(255, 255, 255, 0.45);
+  --accent: #98D8C8;
+  --accent-foreground: #0A0A0B;
+  --destructive: #C62828;
+  --destructive-foreground: rgba(255, 255, 255, 0.95);
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(26, 26, 31, 0.8);
+  --ring: rgba(229, 57, 53, 0.6);
+  --chart-1: #E53935;
+  --chart-2: #EF5350;
+  --chart-3: #FFCDD2;
+  --chart-4: #E57373;
+  --chart-5: #FFEBEE;
+  --sidebar: rgba(26, 26, 31, 0.8);
+  --sidebar-foreground: rgba(255, 255, 255, 0.95);
+  --sidebar-primary: #E53935;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(255, 255, 255, 0.03);
+  --sidebar-accent-foreground: rgba(255, 255, 255, 0.95);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: rgba(229, 57, 53, 0.6);
+  
+  /* Canonical Watermelon Red Token System */
+  --melon-red: #E53935;
+  --melon-red-soft: #EF5350;
+  --melon-red-muted: rgba(229, 57, 53, 0.15);
+  --melon-red-border: rgba(229, 57, 53, 0.35);
+  --melon-green: #98D8C8;
+  
+  /* Glass Surfaces */
+  --glass-bg: rgba(26, 26, 31, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-glow: rgba(229, 57, 53, 0.15);
+  
+  /* Dark Mode Interactive Colors */
+  --interactive-muted: rgba(255, 255, 255, 0.6);
+  --interactive-hover: rgba(255, 255, 255, 0.9);
+  --dropdown-bg: rgba(26, 26, 31, 0.98);
+  --dropdown-item-hover: rgba(255, 255, 255, 0.05);
 }
 
 @theme inline {
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  --font-sans: 'Poppins', 'Poppins Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
-  --font-serif: 'Vollkorn', 'Vollkorn Fallback', serif;
-
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -117,7 +135,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
-  --color-accent-foreground: #ffffff;
+  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -128,6 +146,10 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -136,148 +158,193 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-
-  /* Radius scale — spec px values, drives rounded-* utilities AND raw var() */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-
-  /* Shadow scale */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
-}
+  --font-serif: 'Vollkorn', 'Vollkorn Fallback';}
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    background: var(--bg-base);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-    font-size: 15px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply bg-background text-foreground;
   }
 }
 
-/* Thin dark scrollbar with accent thumb on hover */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+/* ============================================
+   HYDRATION-SAFE MELON BACKGROUND
+   Pure CSS - No JavaScript - No hydration issues
+   ============================================ */
+
+/* Light mode background - clean white with subtle watermelon accent */
+body {
+  background: 
+    radial-gradient(
+      1200px 600px at 10% 10%,
+      rgba(229, 57, 53, 0.03),
+      transparent 60%
+    ),
+    radial-gradient(
+      1000px 500px at 90% 20%,
+      rgba(13, 148, 136, 0.03),
+      transparent 65%
+    ),
+    linear-gradient(
+      180deg,
+      #FFFFFF,
+      #FAFAFA
+    );
+  background-attachment: fixed;
 }
 
-/* Selection highlight uses accent at 30% opacity */
-::selection {
-  background: rgba(255, 77, 109, 0.3);
-  color: var(--text-primary);
+/* Dark mode background with layered melon gradients */
+.dark body {
+  --bg-primary: #0A0A0B;
+  --bg-secondary: #0D0D0F;
+  
+  background:
+    radial-gradient(
+      1200px 600px at 10% 10%,
+      rgba(229, 57, 53, 0.12),
+      transparent 60%
+    ),
+    radial-gradient(
+      1000px 500px at 90% 20%,
+      rgba(229, 57, 53, 0.10),
+      transparent 65%
+    ),
+    radial-gradient(
+      800px 400px at 50% 90%,
+      rgba(152, 216, 200, 0.08),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      var(--bg-primary),
+      var(--bg-secondary)
+    );
+  background-attachment: fixed;
 }
 
+/* Subtle GPU-safe gradient drift - CSS only animation */
+@media (prefers-reduced-motion: no-preference) {
+  .dark body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(
+      120deg,
+      rgba(229, 57, 53, 0.06),
+      rgba(229, 57, 53, 0.04),
+      rgba(152, 216, 200, 0.05)
+    );
+    animation: melon-drift 40s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  @keyframes melon-drift {
+    0%   { transform: translate3d(0, 0, 0); }
+    50%  { transform: translate3d(-2%, -1%, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+}
+
+/* Ensure content stays above background */
+.dark body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Custom scrollbar for the melon theme */
 @layer utilities {
-  /* Legacy scrollbar helper — now aliases the global thin style */
   .scrollbar-melon::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 8px;
+    height: 8px;
   }
   .scrollbar-melon::-webkit-scrollbar-track {
     background: transparent;
   }
   .scrollbar-melon::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 99px;
+    background: oklch(0.65 0.15 15 / 0.3);
+    border-radius: 4px;
   }
   .scrollbar-melon::-webkit-scrollbar-thumb:hover {
-    background: var(--accent);
+    background: oklch(0.65 0.15 15 / 0.5);
   }
-
-  /* Glass surfaces (legacy components) */
+  
+  /* Glassmorphism utilities */
   .glass-card {
     background: var(--glass-bg);
-    backdrop-filter: blur(24px) saturate(160%);
+    backdrop-filter: blur(24px) saturate(180%);
     border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-md);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
   }
+  
+  .dark .glass-card {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
   .glass-input {
-    background: var(--bg-input);
-    border: 1px solid var(--border-focus);
+    background: var(--input);
+    backdrop-filter: blur(16px);
+    border: 1.5px solid var(--border);
     transition: border-color 0.2s, box-shadow 0.2s;
   }
+  
   .glass-input:focus {
-    border-color: var(--accent);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--ring);
     outline: none;
   }
-
-  /* Accent gradient (was melon-gradient) */
+  
+  /* Melon gradient - Natural Watermelon Flesh Red */
   .melon-gradient {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+    background: linear-gradient(135deg, var(--melon-red) 0%, var(--melon-red-soft) 100%);
   }
-
-  /* Inline code */
+  
+  /* Inline code styling */
   .inline-code {
-    background: var(--accent-subtle);
+    background: rgba(229, 57, 53, 0.1);
     padding: 0.125rem 0.375rem;
-    border-radius: var(--radius-sm);
+    border-radius: 0.25rem;
     font-family: var(--font-mono);
     font-size: 0.875em;
-    color: var(--accent);
+    color: var(--melon-coral);
   }
-
-  /* Message entrance */
+  
+  /* Message animations */
   @keyframes messageEnter {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-
-  /* Streaming caret */
-  @keyframes caretBlink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+  
+  @keyframes pulseGlow {
+    0%, 100% { 
+      box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.4); 
+    }
+    50% { 
+      box-shadow: 0 0 0 4px rgba(229, 57, 53, 0); 
+    }
   }
-  .streaming-caret::after {
-    content: '';
-    display: inline-block;
-    width: 2px;
-    height: 1em;
-    margin-left: 2px;
-    vertical-align: text-bottom;
-    background: var(--accent);
-    animation: caretBlink 1s step-end infinite;
-  }
-
-  /* Seed-dot loading (watermelon typing indicator) */
-  @keyframes seed-pulse {
-    0%, 100% { opacity: 0.2; transform: scale(0.8); }
-    50% { opacity: 1; transform: scale(1); }
-  }
-  .seed-pulse {
-    animation: seed-pulse 1.2s ease-in-out infinite;
-  }
-
-  /* Live pulse dot (MelonScope) */
-  @keyframes livePulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.85); }
-  }
-  .live-dot {
-    animation: livePulse 1.6s ease-in-out infinite;
-  }
-
+  
+  /* Respect reduced motion preferences */
   @media (prefers-reduced-motion: reduce) {
-    .seed-pulse, .live-dot, .streaming-caret::after,
+    .message-user, .message-assistant,
     [style*="animation: messageEnter"] {
+      animation: none !important;
+    }
+    
+    .animate-bounce, .animate-spin, .animate-pulse {
       animation: none !important;
     }
   }
