@@ -4,17 +4,11 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-import { Poppins as V0_Font_Poppins, Geist_Mono as V0_Font_Geist_Mono, Vollkorn as V0_Font_Vollkorn } from 'next/font/google'
 import { ThemeProvider } from "@/components/theme-provider"
 
-// Initialize fonts
-const _poppins = V0_Font_Poppins({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
-const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
-const _vollkorn = V0_Font_Vollkorn({ subsets: ['latin'], weight: ["400","500","600","700","800","900"] })
-
 export const metadata: Metadata = {
-  title: 'OptiMelon - The Unified AI Studio',
-  description: 'A clean, provider-agnostic LLM chat interface designed for productive technical work.',
+  title: 'OptiMelon',
+  description: 'A direct, production-grade AI experimentation platform. Route across 10+ open models.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -41,12 +35,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`font-sans antialiased`}>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body
+        className="antialiased h-full"
+        style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
-          enableSystem
+          forcedTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
           {children}

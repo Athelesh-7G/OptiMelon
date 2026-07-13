@@ -4,6 +4,12 @@ import { useEffect, useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import type { TelemetryEvent } from "@/lib/telemetry"
 
+function latencyColor(ms: number): string {
+  if (ms < 1000) return "var(--accent)"
+  if (ms <= 3000) return "var(--warning)"
+  return "var(--error)"
+}
+
 export function ExecutionTraceExplorer() {
   const [events, setEvents] = useState<TelemetryEvent[]>([])
   const [loaded, setLoaded] = useState(false)
@@ -21,68 +27,63 @@ export function ExecutionTraceExplorer() {
           setLoaded(true)
         }
       } catch {
-        // Ignore fetch errors, keep showing last known data
+        // keep last known data
       }
     }
 
     fetchEvents()
     const interval = setInterval(fetchEvents, 3000)
-
     return () => {
       isMounted = false
       clearInterval(interval)
     }
   }, [])
 
+  if (loaded && events.length === 0) {
+    return (
+      <p className="text-center py-8 text-[13px]" style={{ color: "var(--text-muted)" }}>
+        No executions yet
+      </p>
+    )
+  }
+
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-border">
-        <h2 className="text-sm font-semibold text-foreground">Execution Trace Explorer</h2>
-      </div>
-      {loaded && events.length === 0 ? (
-        <p className="px-4 py-6 text-sm text-muted-foreground text-center">
-          No composite executions yet.
-        </p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-xs text-muted-foreground border-b border-border">
-                <th className="px-4 py-2 font-medium">Time</th>
-                <th className="px-4 py-2 font-medium">Model</th>
-                <th className="px-4 py-2 font-medium">Provider</th>
-                <th className="px-4 py-2 font-medium">Latency</th>
-                <th className="px-4 py-2 font-medium">Type</th>
-                <th className="px-4 py-2 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.map((event) => (
-                <tr key={event.id} className="border-b border-border last:border-0 hover:bg-secondary/50">
-                  <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">
-                    {formatDistanceToNow(event.timestamp, { addSuffix: true })}
-                  </td>
-                  <td className="px-4 py-2 text-foreground font-medium">{event.model}</td>
-                  <td className="px-4 py-2 text-muted-foreground">{event.provider}</td>
-                  <td className="px-4 py-2 text-foreground">{event.latencyMs}ms</td>
-                  <td className="px-4 py-2 text-muted-foreground">{event.requestType}</td>
-                  <td className="px-4 py-2">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        event.success
-                          ? "bg-accent/15 text-accent"
-                          : "bg-destructive/15 text-destructive"
-                      }`}
-                    >
-                      {event.success ? "Success" : "Failed"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div>
+      {events.map((event) => (
+        <div
+          key={event.id}
+          className="flex items-center gap-4"
+          style={{ height: "48px", padding: "0 8px", borderBottom: "1px solid var(--border-subtle)" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-elevated)")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+        >
+          <div className="flex-1 min-w-0">
+            <span className="block truncate text-[14px]" style={{ color: "var(--text-primary)" }}>
+              {event.model}
+            </span>
+            <span className="block truncate text-[12px]" style={{ color: "var(--text-secondary)" }}>
+              {event.provider}
+            </span>
+          </div>
+          <span className="font-mono text-[13px] flex-shrink-0" style={{ color: latencyColor(event.latencyMs) }}>
+            {event.latencyMs}ms
+          </span>
+          <div className="flex items-center gap-2 flex-shrink-0" style={{ minWidth: "110px", justifyContent: "flex-end" }}>
+            <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>
+              {formatDistanceToNow(event.timestamp, { addSuffix: true })}
+            </span>
+            <span
+              style={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "999px",
+                background: event.success ? "var(--success)" : "var(--error)",
+              }}
+              title={event.success ? "Success" : "Failed"}
+            />
+          </div>
         </div>
-      )}
+      ))}
     </div>
   )
 }

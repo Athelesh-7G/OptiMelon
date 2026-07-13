@@ -1,74 +1,31 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { ChevronDown, Code, Pen, Brain, Globe, Sparkles } from "lucide-react"
+import { useState, useEffect, useRef, useMemo } from "react"
+import { ChevronDown, Search } from "lucide-react"
 import {
   AVAILABLE_MODELS,
   MODEL_CATEGORIES,
   getModelById,
-  getModelsByCategory,
-  type ModelCategory,
+  type ModelInfo,
 } from "@/lib/models"
 
 interface ChatModelSelectorProps {
   selectedModel: string
   onModelChange: (modelId: string) => void
+  provider?: string
 }
 
-// Category config with icon and color - using canonical watermelon red tokens
-const CATEGORY_CONFIG: Record<ModelCategory, { icon: React.ReactNode; color: string; bgColor: string }> = {
-  general: {
-    icon: <Sparkles className="h-3.5 w-3.5" />,
-    color: "var(--melon-green)",
-    bgColor: "color-mix(in srgb, var(--melon-green) 15%, transparent)",
-  },
-  coders: {
-    icon: <Code className="h-3.5 w-3.5" />,
-    color: "var(--melon-red)",
-    bgColor: "var(--melon-red-muted)",
-  },
-  creators: {
-    icon: <Pen className="h-3.5 w-3.5" />,
-    color: "var(--melon-red)",
-    bgColor: "var(--melon-red-muted)",
-  },
-  reasoning: {
-    icon: <Brain className="h-3.5 w-3.5" />,
-    color: "#7C3AED",
-    bgColor: "rgba(124, 58, 237, 0.15)",
-  },
-  enterprise: {
-    icon: <Globe className="h-3.5 w-3.5" />,
-    color: "#2563EB",
-    bgColor: "rgba(37, 99, 235, 0.15)",
-  },
-}
-
-// Individual Category Dropdown Component
-function CategoryDropdown({
-  category,
-  selectedModel,
-  onModelChange,
-}: {
-  category: ModelCategory
-  selectedModel: string
-  onModelChange: (modelId: string) => void
-}) {
+export function ChatModelSelector({ selectedModel, onModelChange, provider }: ChatModelSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  
-  const config = CATEGORY_CONFIG[category]
-  const models = getModelsByCategory(category)
-  const categoryInfo = MODEL_CATEGORIES.find((c) => c.id === category)
-  
-  // Check if selected model is in this category
-  const selectedInThisCategory = models.some((m) => m.id === selectedModel)
-  const selectedModelInCategory = models.find((m) => m.id === selectedModel)
+  const [query, setQuery] = useState("")
+  const [mounted, setMounted] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  // Close dropdown when clicking outside
+  useEffect(() => setMounted(true), [])
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false)
       }
     }
@@ -76,134 +33,175 @@ function CategoryDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const handleModelSelect = (modelId: string) => {
+  const current = getModelById(selectedModel)
+  const displayProvider = provider || current?.provider || ""
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return AVAILABLE_MODELS
+    return AVAILABLE_MODELS.filter(
+      (m) =>
+        m.name.toLowerCase().includes(q) ||
+        m.provider.toLowerCase().includes(q) ||
+        m.category.toLowerCase().includes(q)
+    )
+  }, [query])
+
+  // Group filtered models by category (in MODEL_CATEGORIES order)
+  const grouped = useMemo(() => {
+    return MODEL_CATEGORIES.map((cat) => ({
+      category: cat,
+      models: filtered.filter((m) => m.category === cat.id),
+    })).filter((g) => g.models.length > 0)
+  }, [filtered])
+
+  const handleSelect = (modelId: string) => {
     onModelChange(modelId)
     setIsOpen(false)
+    setQuery("")
+  }
+
+  if (!mounted) {
+    return <div style={{ width: "160px", height: "32px" }} className="rounded-[10px] animate-pulse" />
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      {/* Category Button */}
+    <div className="relative" ref={containerRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 text-xs font-medium ${
-          selectedInThisCategory ? "ring-1" : "hover:border-border"
-        }`}
+        onClick={() => setIsOpen((v) => !v)}
+        className="flex items-center gap-2 transition-colors"
         style={{
-          background: selectedInThisCategory ? config.bgColor : "var(--secondary)",
-          borderColor: selectedInThisCategory ? config.color : "var(--border)",
-          color: selectedInThisCategory ? config.color : "var(--muted-foreground)",
-          ...({ "--tw-ring-color": selectedInThisCategory ? config.color : undefined } as React.CSSProperties),
+          height: "32px",
+          padding: "0 12px",
+          borderRadius: "var(--radius-md)",
+          border: "1px solid var(--border-color)",
+          background: "var(--bg-elevated)",
+          color: "var(--text-primary)",
+          fontSize: "13px",
         }}
+        onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--border-focus)")}
+        onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border-color)")}
       >
-        {config.icon}
-        <span>{categoryInfo?.label}</span>
+        {displayProvider && (
+          <span
+            className="uppercase"
+            style={{
+              fontSize: "10px",
+              fontWeight: 600,
+              letterSpacing: "0.04em",
+              padding: "2px 6px",
+              borderRadius: "var(--radius-sm)",
+              background: "var(--accent-subtle)",
+              color: "var(--accent)",
+            }}
+          >
+            {displayProvider}
+          </span>
+        )}
+        <span className="truncate max-w-[160px]">{current?.name ?? selectedModel}</span>
         <ChevronDown
-          className={`h-3 w-3 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-          style={{ opacity: 0.6 }}
+          size={14}
+          style={{ color: "var(--text-secondary)", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}
         />
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className="absolute bottom-full left-0 mb-2 z-50 min-w-[220px] rounded-lg border shadow-xl overflow-hidden bg-popover"
+          className="absolute right-0 mt-2 z-50"
           style={{
-            borderColor: "var(--border)",
-            backdropFilter: "blur(20px)",
+            width: "280px",
+            background: "var(--bg-surface)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "var(--radius-lg)",
+            boxShadow: "var(--shadow-lg)",
+            padding: "8px",
           }}
         >
-          {/* Category Header */}
+          {/* Search */}
           <div
-            className="px-3 py-2 border-b flex items-center gap-2"
+            className="flex items-center gap-2 mb-2 px-2.5"
             style={{
-              borderColor: "var(--border)",
-              background: config.bgColor,
+              height: "34px",
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--border-color)",
+              borderRadius: "var(--radius-md)",
             }}
           >
-            <span style={{ color: config.color }}>{config.icon}</span>
-            <span className="text-xs font-semibold" style={{ color: config.color }}>
-              {categoryInfo?.label}
-            </span>
-            <span className="text-[10px] ml-auto text-muted-foreground">
-              {models.length} model{models.length !== 1 ? "s" : ""}
-            </span>
+            <Search size={14} style={{ color: "var(--text-muted)" }} />
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search models..."
+              className="flex-1 bg-transparent outline-none text-[13px]"
+              style={{ color: "var(--text-primary)" }}
+            />
           </div>
 
-          {/* Models List */}
-          <div className="p-1.5 max-h-[200px] overflow-y-auto scrollbar-melon">
-            {models.map((model) => (
-              <button
-                key={model.id}
-                onClick={() => handleModelSelect(model.id)}
-                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md transition-all duration-200 text-left ${
-                  selectedModel === model.id ? "" : "hover:bg-secondary"
-                }`}
-                style={{
-                  background: selectedModel === model.id ? config.bgColor : "transparent",
-                }}
-              >
-                <div className="flex-1 min-w-0">
-                  <div
-                    className="text-sm font-medium truncate"
-                    style={{
-                      color: selectedModel === model.id ? config.color : "var(--foreground)",
-                    }}
+          {/* List */}
+          <div className="max-h-[320px] overflow-y-auto scrollbar-melon">
+            {grouped.length === 0 ? (
+              <p className="px-3 py-4 text-center text-[13px]" style={{ color: "var(--text-muted)" }}>
+                No models found
+              </p>
+            ) : (
+              grouped.map((group) => (
+                <div key={group.category.id} className="mb-1">
+                  <p
+                    className="px-2.5 pt-2 pb-1"
+                    style={{ color: "var(--text-muted)", fontSize: "10px", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase" }}
                   >
-                    {model.name}
-                  </div>
-                  <div className="text-[10px] truncate text-muted-foreground">
-                    {model.contextLength}
-                  </div>
+                    {group.category.label}
+                  </p>
+                  {group.models.map((model: ModelInfo) => {
+                    const isSelected = model.id === selectedModel
+                    return (
+                      <button
+                        key={model.id}
+                        onClick={() => handleSelect(model.id)}
+                        className="w-full flex items-center gap-2 text-left transition-colors"
+                        style={{
+                          padding: "10px 12px",
+                          borderRadius: "var(--radius-md)",
+                          background: isSelected ? "var(--accent-subtle)" : "transparent",
+                          borderLeft: isSelected ? "2px solid var(--accent)" : "2px solid transparent",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) e.currentTarget.style.background = "var(--bg-elevated)"
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) e.currentTarget.style.background = "transparent"
+                        }}
+                      >
+                        <span className="flex-1 min-w-0">
+                          <span className="block truncate text-[14px]" style={{ color: "var(--text-primary)" }}>
+                            {model.name}
+                          </span>
+                          <span className="block truncate text-[12px]" style={{ color: "var(--text-muted)" }}>
+                            {model.provider}
+                          </span>
+                        </span>
+                        <span
+                          className="flex-shrink-0"
+                          style={{
+                            fontSize: "11px",
+                            padding: "2px 8px",
+                            borderRadius: "999px",
+                            background: "var(--accent-subtle)",
+                            color: "var(--accent)",
+                          }}
+                        >
+                          {group.category.label}
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
-                {selectedModel === model.id && (
-                  <div
-                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={{ background: config.color }}
-                  />
-                )}
-              </button>
-            ))}
+              ))
+            )}
           </div>
         </div>
       )}
-    </div>
-  )
-}
-
-export function ChatModelSelector({
-  selectedModel,
-  onModelChange,
-}: ChatModelSelectorProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return (
-      <div className="flex items-center gap-1.5">
-        {MODEL_CATEGORIES.map((category) => (
-          <div
-            key={category.id}
-            className="h-8 w-20 rounded-lg animate-pulse bg-secondary"
-          />
-        ))}
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex items-center gap-1.5 flex-wrap">
-      {MODEL_CATEGORIES.map((category) => (
-        <CategoryDropdown
-          key={category.id}
-          category={category.id}
-          selectedModel={selectedModel}
-          onModelChange={onModelChange}
-        />
-      ))}
     </div>
   )
 }

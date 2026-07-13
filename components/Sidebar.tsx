@@ -2,9 +2,28 @@
 
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
-import { Plus, Settings, Trash2, Linkedin, Instagram, Mail, PanelLeft, ChevronRight, BarChart2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { formatDistanceToNow } from "date-fns"
+import {
+  Plus,
+  Settings,
+  Trash2,
+  PanelLeft,
+  ChevronRight,
+  BarChart2,
+  Layers,
+  Sparkles,
+  Code,
+  Pen,
+  Brain,
+  Globe,
+} from "lucide-react"
+import { MelonIcon } from "@/components/ui/MelonIcon"
+import {
+  MODEL_CATEGORIES,
+  getModelsByCategory,
+  getModelById,
+  DEFAULT_MODEL_ID,
+  type ModelCategory,
+} from "@/lib/models"
 
 interface Chat {
   id: string
@@ -15,6 +34,8 @@ interface Chat {
 interface SidebarProps {
   chats: Chat[]
   currentChatId: string | null
+  selectedModel: string
+  onSelectModel: (modelId: string) => void
   onNewChat: () => void
   onSelectChat: (chatId: string) => void
   onDeleteChat: (chatId: string) => void
@@ -23,9 +44,27 @@ interface SidebarProps {
   onToggle: () => void
 }
 
+const CATEGORY_ICONS: Record<ModelCategory, React.ReactNode> = {
+  general: <Sparkles size={16} />,
+  coders: <Code size={16} />,
+  creators: <Pen size={16} />,
+  reasoning: <Brain size={16} />,
+  enterprise: <Globe size={16} />,
+}
+
+const labelStyle: React.CSSProperties = {
+  color: "var(--text-muted)",
+  fontSize: "11px",
+  fontWeight: 500,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+}
+
 export function Sidebar({
   chats,
   currentChatId,
+  selectedModel,
+  onSelectModel,
   onNewChat,
   onSelectChat,
   onDeleteChat,
@@ -35,211 +74,240 @@ export function Sidebar({
 }: SidebarProps) {
   const [isMobile, setIsMobile] = useState(false)
 
-  // Handle responsive detection after mount to avoid hydration issues
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    // Initial check
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
     checkMobile()
-    
-    // Listen for resize
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
-  // Close sidebar when selecting chat on mobile
+  const activeCategory = getModelById(selectedModel)?.category
+
+  const handleCategoryClick = (categoryId: ModelCategory | "all") => {
+    if (categoryId === "all") {
+      onSelectModel(DEFAULT_MODEL_ID)
+      return
+    }
+    const models = getModelsByCategory(categoryId)
+    if (models.length > 0) onSelectModel(models[0].id)
+  }
+
   const handleSelectChat = (chatId: string) => {
     onSelectChat(chatId)
-    if (isMobile) {
-      onToggle()
-    }
+    if (isMobile) onToggle()
   }
 
   const handleNewChat = () => {
     onNewChat()
-    if (isMobile) {
-      onToggle()
-    }
+    if (isMobile) onToggle()
   }
+
+  const recentChats = [...chats].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 5)
+
+  const pillBase =
+    "w-full flex items-center gap-2.5 h-9 px-3 rounded-[10px] text-[13px] transition-colors duration-150 text-left"
+
+  const categories: Array<{ id: ModelCategory | "all"; label: string; icon: React.ReactNode }> = [
+    { id: "all", label: "All", icon: <Layers size={16} /> },
+    ...MODEL_CATEGORIES.map((c) => ({ id: c.id, label: c.label, icon: CATEGORY_ICONS[c.id] })),
+  ]
 
   return (
     <>
-      {/* Backdrop - only show on mobile when sidebar is open */}
+      {/* Mobile backdrop */}
       {isMobile && isOpen && (
         <button
           type="button"
-          className="fixed inset-0 bg-background/60 backdrop-blur-sm z-30"
+          className="fixed inset-0 z-30"
+          style={{ background: "rgba(0,0,0,0.6)" }}
           onClick={onToggle}
           aria-label="Close sidebar"
         />
       )}
 
-      {/* Peek strip - visible when sidebar is closed (desktop only) */}
+      {/* Peek strip when closed (desktop) */}
       {!isMobile && !isOpen && (
         <button
           onClick={onToggle}
-          className="fixed left-0 top-0 h-screen w-10 z-40 flex items-center justify-center bg-sidebar/50 backdrop-blur-md border-r border-sidebar-border hover:bg-sidebar/80 transition-colors group"
+          className="fixed left-0 top-0 h-screen w-10 z-40 flex items-center justify-center transition-colors"
+          style={{ background: "var(--bg-surface)", borderRight: "1px solid var(--border-subtle)" }}
           aria-label="Open sidebar"
         >
-          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-sidebar-foreground transition-colors" />
+          <ChevronRight size={18} style={{ color: "var(--text-secondary)" }} />
         </button>
       )}
 
       <aside
-        className={`
-          fixed inset-y-0 left-0 z-40
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-          w-[260px] h-screen flex flex-col border-r
-          transition-transform duration-300 ease-in-out
-          bg-sidebar border-sidebar-border
-        `}
-        style={{ 
-          backdropFilter: 'blur(20px)' 
+        className="fixed inset-y-0 left-0 z-40 h-screen flex flex-col transition-transform duration-300 ease-in-out"
+        style={{
+          width: "240px",
+          background: "var(--bg-surface)",
+          borderRight: "1px solid var(--border-subtle)",
+          transform: isOpen ? "translateX(0)" : "translateX(-100%)",
         }}
       >
-        {/* Sidebar Header with Toggle */}
-        <div className="flex items-center justify-between p-3 border-b border-sidebar-border">
+        {/* Brand */}
+        <div className="flex items-center justify-between" style={{ padding: "20px 16px" }}>
           <div className="flex items-center gap-2">
-            <span className="text-lg" role="img" aria-label="watermelon">🍉</span>
-            <span className="text-sm font-medium text-sidebar-foreground">Chats</span>
+            <MelonIcon variant="slice" size={28} />
+            <span className="text-[15px] font-semibold" style={{ color: "var(--accent)" }}>
+              OptiMelon
+            </span>
           </div>
           <button
             onClick={onToggle}
-            className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-muted-foreground hover:text-sidebar-foreground"
+            className="p-1.5 rounded-md transition-colors"
+            style={{ color: "var(--text-secondary)" }}
             aria-label="Close sidebar"
           >
-            <PanelLeft className="h-4 w-4" />
+            <PanelLeft size={16} />
           </button>
         </div>
-        
-        {/* New Chat Button */}
-        <div className="p-3">
-          <Button
-            onClick={handleNewChat}
-            className="w-full melon-gradient hover:opacity-90 transition-all duration-200 text-sm text-white"
-            style={{ boxShadow: "0 2px 6px var(--melon-red-muted)" }}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Chat
-          </Button>
+
+        {/* Models */}
+        <div className="px-3 pb-2">
+          <p style={labelStyle} className="px-3 mb-2">
+            Models
+          </p>
+          <div className="space-y-0.5">
+            {categories.map((cat) => {
+              const isActive =
+                cat.id === "all" ? activeCategory === undefined : activeCategory === cat.id
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => handleCategoryClick(cat.id)}
+                  className={pillBase}
+                  style={{
+                    background: isActive ? "var(--accent-subtle)" : "transparent",
+                    color: isActive ? "var(--accent)" : "var(--text-secondary)",
+                    borderLeft: isActive ? "2px solid var(--accent)" : "2px solid transparent",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = "var(--bg-elevated)"
+                      e.currentTarget.style.color = "var(--text-primary)"
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = "transparent"
+                      e.currentTarget.style.color = "var(--text-secondary)"
+                    }
+                  }}
+                >
+                  {cat.icon}
+                  <span>{cat.label}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
 
-      {/* Chat History */}
-      <nav className="flex-1 overflow-y-auto scrollbar-melon p-1.5">
-        <div className="space-y-0.5">
-          {chats.length === 0 ? (
-            <div className="text-center py-6 px-3 text-muted-foreground">
-              <p className="text-xs">No history</p>
-            </div>
-          ) : (
-            chats.map((chat) => {
-              const isActive = chat.id === currentChatId
-              return (
-                <div
-                  key={chat.id}
-                  className={`group relative rounded-md p-2 cursor-pointer transition-all duration-150 hover:bg-sidebar-accent ${
-                    isActive ? "border-l-2 bg-primary/10 border-primary" : ""
-                  }`}
-                  onClick={() => handleSelectChat(chat.id)}
-                >
-                  <div className="flex items-start justify-between gap-1.5">
-                    <div className="flex-1 min-w-0">
-                      <h4
-                        className={`text-xs font-medium truncate ${
-                          isActive ? "text-sidebar-foreground" : "text-sidebar-foreground/70"
-                        }`}
+        {/* Recent */}
+        <div className="flex-1 min-h-0 flex flex-col px-3 pt-2">
+          <button
+            onClick={handleNewChat}
+            className="w-full flex items-center gap-2 h-9 px-3 rounded-[10px] text-[13px] mb-3 transition-colors"
+            style={{
+              border: "1px solid var(--border-color)",
+              color: "var(--text-primary)",
+              background: "transparent",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border-color)")}
+          >
+            <Plus size={16} />
+            <span>New chat</span>
+          </button>
+
+          <p style={labelStyle} className="px-3 mb-2">
+            Recent
+          </p>
+          <nav className="flex-1 min-h-0 overflow-y-auto scrollbar-melon">
+            {recentChats.length === 0 ? (
+              <p className="px-3 py-2 text-[13px]" style={{ color: "var(--text-muted)" }}>
+                No conversations yet
+              </p>
+            ) : (
+              <div className="space-y-0.5">
+                {recentChats.map((chat) => {
+                  const isActive = chat.id === currentChatId
+                  return (
+                    <div
+                      key={chat.id}
+                      className="group flex items-center gap-1.5 h-9 px-3 rounded-[10px] cursor-pointer transition-colors"
+                      style={{
+                        background: isActive ? "var(--bg-elevated)" : "transparent",
+                      }}
+                      onClick={() => handleSelectChat(chat.id)}
+                      onMouseEnter={(e) => {
+                        if (!isActive) e.currentTarget.style.background = "var(--bg-elevated)"
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) e.currentTarget.style.background = "transparent"
+                      }}
+                    >
+                      <span
+                        className="flex-1 truncate text-[13px]"
+                        style={{ color: isActive ? "var(--text-primary)" : "var(--text-secondary)" }}
                       >
                         {chat.title}
-                      </h4>
-                      <p className="text-[10px] mt-0.5 text-muted-foreground">
-                        {formatDistanceToNow(chat.updatedAt, {
-                          addSuffix: true,
-                        })}
-                      </p>
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onDeleteChat(chat.id)
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded transition-opacity"
+                        style={{ color: "var(--text-muted)" }}
+                        aria-label="Delete chat"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onDeleteChat(chat.id)
-                      }}
-                      className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-destructive/20 transition-opacity"
-                      aria-label="Delete chat"
-                    >
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </button>
-                  </div>
-                </div>
-              )
-            })
-          )}
-        </div>
-      </nav>
-
-      {/* Sidebar Footer */}
-      <div className="p-3 border-t border-sidebar-border space-y-3">
-        {/* Creator Block */}
-        <div className="space-y-2">
-          <div>
-            <h3 className="text-xs font-semibold text-sidebar-foreground">
-              Athelesh Balachandran
-            </h3>
-            <p className="text-[10px] text-muted-foreground">
-              Creator of OptiMelon
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <a
-              href="https://www.linkedin.com/in/athelesh-balachandran-60a07927a"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-muted-foreground hover:text-sidebar-foreground"
-              aria-label="LinkedIn"
-            >
-              <Linkedin className="h-3.5 w-3.5" />
-            </a>
-            <a
-              href="https://www.instagram.com/athelesh_balachandran/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-muted-foreground hover:text-sidebar-foreground"
-              aria-label="Instagram"
-            >
-              <Instagram className="h-3.5 w-3.5" />
-            </a>
-            <a
-              href="mailto:atheleshbalachandran14@gmail.com"
-              className="p-1.5 rounded-md hover:bg-sidebar-accent transition-colors text-muted-foreground hover:text-sidebar-foreground"
-              aria-label="Email"
-            >
-              <Mail className="h-3.5 w-3.5" />
-            </a>
-          </div>
+                  )
+                })}
+              </div>
+            )}
+          </nav>
         </div>
 
-        {/* MelonScope Link */}
-        <Button
-          asChild
-          variant="ghost"
-          className="w-full justify-start hover:bg-sidebar-accent transition-colors text-xs text-muted-foreground"
-        >
-          <Link href="/melonscope">
-            <BarChart2 className="h-3.5 w-3.5 mr-2" />
-            MelonScope
+        {/* Bottom nav */}
+        <div className="px-3 py-3" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+          <Link
+            href="/melonscope"
+            className={pillBase}
+            style={{ color: "var(--text-secondary)" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--bg-elevated)"
+              e.currentTarget.style.color = "var(--text-primary)"
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent"
+              e.currentTarget.style.color = "var(--text-secondary)"
+            }}
+          >
+            <BarChart2 size={16} />
+            <span>MelonScope</span>
           </Link>
-        </Button>
-
-        {/* Settings Button */}
-        <Button
-          onClick={onOpenSettings}
-          variant="ghost"
-          className="w-full justify-start hover:bg-sidebar-accent transition-colors text-xs text-muted-foreground"
-        >
-          <Settings className="h-3.5 w-3.5 mr-2" />
-          Settings
-        </Button>
-      </div>
+          <button
+            onClick={onOpenSettings}
+            className={pillBase}
+            style={{ color: "var(--text-secondary)" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--bg-elevated)"
+              e.currentTarget.style.color = "var(--text-primary)"
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent"
+              e.currentTarget.style.color = "var(--text-secondary)"
+            }}
+          >
+            <Settings size={16} />
+            <span>Settings</span>
+          </button>
+        </div>
       </aside>
     </>
   )
