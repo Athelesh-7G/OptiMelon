@@ -7,6 +7,7 @@ import {
   type ChatParams,
 } from "@/lib/providers"
 import { buildSystemPrompt } from "@/lib/promptTemplate"
+import { recordTelemetryEvent } from "@/lib/telemetry"
 
 interface ChatRequest {
   messages: Message[]
@@ -40,9 +41,12 @@ const PROVIDER_ENV_KEYS: Record<string, string> = {
 }
 
 export async function POST(request: NextRequest) {
+  let requestProvider: Provider | undefined
+
   try {
     const body: ChatRequest = await request.json()
     const { messages, provider, model, params, stream = false } = body
+    requestProvider = provider
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return Response.json({ error: "Messages are required" }, { status: 400 })
@@ -69,38 +73,79 @@ export async function POST(request: NextRequest) {
     const baseUrl = provider === "openai" ? process.env.OPENAI_BASE_URL : undefined
     const client = createProviderClient(provider, apiKey, baseUrl)
 
-    // Build intelligent system prompt based on user intent
-    const systemPrompt = buildSystemPrompt(messages)
-    
+    // Build intelligent system prompt based on user intent and model context
+    const systemPrompt = buildSystemPrompt(messages, model, provider)
+
     // Check if messages already have a system message
     const hasSystemMessage = messages.some((m) => m.role === "system")
-    
+
     // Prepare final messages with injected system prompt
     const finalMessages: Message[] = hasSystemMessage
       ? messages // User provided their own system message, respect it
       : [{ role: "system", content: systemPrompt }, ...messages]
 
-    if (stream) {
-      const result = await sendMessage(provider, client, model, finalMessages, params, true)
+    const startTime = Date.now()
+    let success = false
+    let responseText: string | null = null
+    let telemetryErrorMessage: string | undefined
 
-      if (result instanceof ReadableStream) {
-        return new Response(result, {
-          headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            Connection: "keep-alive",
-          },
-        })
+    try {
+      if (stream) {
+        const result = await sendMessage(provider, client, model, finalMessages, params, true)
+
+        if (result instanceof ReadableStream) {
+          success = true
+          return new Response(result, {
+            headers: {
+              "Content-Type": "text/event-stream",
+              "Cache-Control": "no-cache",
+              Connection: "keep-alive",
+            },
+          })
+        }
+
+        responseText = result
+        success = true
+        return Response.json({ reply: result })
       }
 
-      return Response.json({ reply: result })
+      const reply = await sendMessage(provider, client, model, finalMessages, params, false)
+      responseText = typeof reply === "string" ? reply : null
+      success = true
+      return Response.json({ reply })
+    } catch (err) {
+      telemetryErrorMessage = err instanceof Error ? err.message : "Unknown error"
+      throw err
+    } finally {
+      // Fire and forget - telemetry must never affect the response path
+      recordTelemetryEvent({
+        id: crypto.randomUUID(),
+        timestamp: startTime,
+        provider,
+        model,
+        latencyMs: Date.now() - startTime,
+        requestType: "text",
+        estimatedTokens: responseText ? Math.ceil(responseText.length / 4) : 0,
+        tokensEstimated: true,
+        isComposite: false,
+        streamed: stream,
+        success,
+        errorMessage: telemetryErrorMessage,
+      })
     }
-
-    const reply = await sendMessage(provider, client, model, finalMessages, params, false)
-    return Response.json({ reply })
   } catch (error) {
     console.error("Chat API error:", error)
-    const errorMessage = error instanceof Error ? error.message : "Unknown error"
+    const rawMessage = error instanceof Error ? error.message : "Unknown error"
+
+    // Give a clean, actionable message for the common "model not in catalog" case
+    // instead of dumping Bytez's raw JSON error body to the frontend.
+    const isBytezModelNotFound =
+      requestProvider === "bytez" && rawMessage.includes("Bytez API error: 404")
+
+    const errorMessage = isBytezModelNotFound
+      ? "This model is not yet enabled in your Bytez account. Visit bytez.com to activate it."
+      : rawMessage
+
     return Response.json({ error: errorMessage }, { status: 500 })
   }
 }

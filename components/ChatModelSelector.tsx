@@ -93,7 +93,7 @@ function CategoryDropdown({
           background: selectedInThisCategory ? config.bgColor : "var(--secondary)",
           borderColor: selectedInThisCategory ? config.color : "var(--border)",
           color: selectedInThisCategory ? config.color : "var(--muted-foreground)",
-          ringColor: selectedInThisCategory ? config.color : undefined,
+          ...({ "--tw-ring-color": selectedInThisCategory ? config.color : undefined } as React.CSSProperties),
         }}
       >
         {config.icon}

@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Plus, Settings, Trash2, Linkedin, Instagram, Mail, PanelLeft, ChevronRight } from "lucide-react"
+import Link from "next/link"
+import { Plus, Settings, Trash2, Linkedin, Instagram, Mail, PanelLeft, ChevronRight, BarChart2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { formatDistanceToNow } from "date-fns"
 
@@ -216,6 +217,18 @@ export function Sidebar({
             </a>
           </div>
         </div>
+
+        {/* MelonScope Link */}
+        <Button
+          asChild
+          variant="ghost"
+          className="w-full justify-start hover:bg-sidebar-accent transition-colors text-xs text-muted-foreground"
+        >
+          <Link href="/melonscope">
+            <BarChart2 className="h-3.5 w-3.5 mr-2" />
+            MelonScope
+          </Link>
+        </Button>
 
         {/* Settings Button */}
         <Button

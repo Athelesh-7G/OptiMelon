@@ -165,7 +165,7 @@ export function ChatWindow() {
         content: m.content,
       }))
 
-      const fullMessages = buildMessages(systemPrompt, conversationMessages)
+      const fullMessages = buildMessages(systemPrompt, conversationMessages, model, provider)
 
       const response = await fetch("/api/chat", {
         method: "POST",
