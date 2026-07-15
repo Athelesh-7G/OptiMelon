@@ -25,3 +25,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local-only docs (not published to GitHub)
+PROJECT_SUMMARY.md
+MELONSCOPE_GUIDE.md

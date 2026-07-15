@@ -1,6 +1,6 @@
 # 🍉 OptiMelon
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-optimelon.vercel.app-ff4d6d?style=flat-square)](https://v0-optimelon.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-optimelon.vercel.app-ff4d6d?style=flat-square)](https://v0-optimelon.vercel.app/)
 [![GitHub](https://img.shields.io/badge/GitHub-Athelesh--7G%2FOptiMelon-181717?style=flat-square&logo=github)](https://github.com/Athelesh-7G/OptiMelon)
 [![Built with Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -61,8 +61,6 @@ Model selection today is **category-based static routing**: `lib/models.ts` maps
 
 MelonScope is OptiMelon's built-in observability layer. Every request through `/api/chat` is instrumented at a single choke point and pushed into an in-memory ring buffer, then aggregated on demand.
 
-**Access it at [`/melonscope`](https://v0-optimelon.vercel.app/melonscope).**
-
 It tracks:
 - Total requests, average / p95 / min / max latency
 - Per-model breakdown (count, avg latency, p95, min/max)
@@ -70,53 +68,11 @@ It tracks:
 - Most-used model, text-vs-image split, composite-routing usage
 - A live execution trace of the last 20 requests (model, latency, type, success/failure)
 
-Full details in [MELONSCOPE_GUIDE.md](./MELONSCOPE_GUIDE.md).
-
----
-
-## Setup
-
-**Requirements:** Node 18+ and [pnpm](https://pnpm.io).
-
-```bash
-pnpm install
-```
-
-Create `.env.local` in the project root with at least a Bytez key (other providers are optional and only needed if you route to them):
-
-```bash
-BYTEZ_API_KEY=your_bytez_key_here
-# Optional, per provider you intend to use:
-# OPENAI_API_KEY=...
-# ANTHROPIC_API_KEY=...
-# GEMINI_API_KEY=...
-# MOONSHOT_API_KEY=...
-# DEEPSEEK_API_KEY=...
-# GROQ_API_KEY=...
-# TOGETHER_API_KEY=...
-```
-
-Then:
-
-```bash
-pnpm dev      # start the dev server on http://localhost:3000
-pnpm build    # production build
-pnpm start    # serve the production build
-```
-
-All API keys are read from `process.env` at request time and are **never hardcoded** in source.
-
-### A note on honesty: Bytez model activation
-
-The 10 default models all route through Bytez. A Bytez API key authenticates successfully but only resolves models that are **activated in that account's catalog** — a fresh/free-tier key returns an empty catalog, and requests fail with a `404`. OptiMelon detects this specific case and surfaces a clean, actionable message ("This model is not yet enabled in your Bytez account. Visit bytez.com to activate it.") instead of a raw error dump. If chat returns that message, activate the models on your Bytez account rather than debugging the code.
-
 ---
 
 ## Project Documentation
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — system design, routing, provider abstraction, telemetry, prompt security
-- [MELONSCOPE_GUIDE.md](./MELONSCOPE_GUIDE.md) — telemetry deep dive and extension guide
-- [PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md) — engineering decisions and rationale
 
 ---
 
