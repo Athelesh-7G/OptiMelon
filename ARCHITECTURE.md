@@ -161,12 +161,3 @@ A user-supplied custom system prompt (via settings) takes priority when present,
 
 ---
 
-## 6. A Real-World Failure Mode, Resolved
-
-The 10 default models route through Bytez. During integration, every model returned a Bytez `404`. Probing the Bytez API directly isolated the cause: the API key **authenticated** (a bad key returns `401`, a valid key with no catalog returns `404` with an empty catalog list) — the account simply had no activated models. This is an upstream/account condition, not a code bug.
-
-Rather than dumping Bytez's raw JSON error to the user, `app/api/chat/route.ts` detects this specific case (`provider === "bytez"` and the error contains `Bytez API error: 404`) and returns:
-
-> "This model is not yet enabled in your Bytez account. Visit bytez.com to activate it."
-
-The **raw** upstream error is still preserved in the telemetry event's `errorMessage` for debugging — the clean message is surfaced to the user, the full detail is retained internally. This separation (actionable message out, full detail logged) is applied deliberately.
