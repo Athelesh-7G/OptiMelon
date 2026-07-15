@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
       requestProvider === "bytez" && rawMessage.includes("Bytez API error: 404")
 
     const errorMessage = isBytezModelNotFound
-      ? "This model is not yet enabled in your Bytez account. Visit bytez.com to activate it."
+      ? "Model inference is temporarily unavailable. Please select a different model and try again."
       : rawMessage
 
     return Response.json({ error: errorMessage }, { status: 500 })
